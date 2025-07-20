@@ -1,0 +1,24 @@
+{%- paginate collections.all.products by 24 -%}
+  {%- for product in collections.all.products -%}
+    {%- assign featured_products = featured_products | append: product.id | append: ',' -%}
+  {%- endfor -%}
+{%- endpaginate -%}
+
+{% section 'hero-banner' %}
+{% section 'categories' %}
+{% section 'featured-products' %}
+{% section 'newsletter-signup' %}
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "WebSite",
+  "name": {{ shop.name | json }},
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {{ potential_action_target | json }},
+    "query-input": "required name=search_term_string"
+  },
+  "url": {{ shop.url | append: page.url | json }}
+}
+</script>
