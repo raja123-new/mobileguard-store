@@ -1,0 +1,307 @@
+<quick-view-modal id="QuickView-{{ product.id }}" class="quick-view-modal">
+  <div
+    role="dialog"
+    aria-label="{{ 'products.product.quick_view' | t: product_name: product.title | escape }}"
+    aria-modal="true"
+    class="quick-view-modal__content global-settings-popup"
+    tabindex="-1"
+  >
+    <button
+      id="ModalClose-QuickView-{{ product.id }}"
+      type="button"
+      class="quick-view-modal__toggle"
+      aria-label="{{ 'accessibility.close' | t }}"
+    >
+      <svg class="icon icon-close" aria-hidden="true" focusable="false">
+        <use href="#icon-close">
+      </svg>
+    </button>
+    
+    <div class="quick-view-content">
+      <div class="quick-view-media">
+        {%- if product.featured_media -%}
+          <div class="quick-view-image">
+            <img
+              src="{{ product.featured_media | image_url: width: 600 }}"
+              alt="{{ product.featured_media.alt | escape }}"
+              width="600"
+              height="{{ 600 | divided_by: product.featured_media.aspect_ratio | round }}"
+              loading="lazy"
+            >
+          </div>
+        {%- else -%}
+          <div class="quick-view-image placeholder">
+            {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+          </div>
+        {%- endif -%}
+      </div>
+      
+      <div class="quick-view-info">
+        <h2 class="quick-view-title">{{ product.title | escape }}</h2>
+        
+        <div class="quick-view-price">
+          {% render 'price', product: product, price_class: 'price--large' %}
+        </div>
+        
+        {%- if product.description != blank -%}
+          <div class="quick-view-description">
+            {{ product.description | truncate: 200 }}
+          </div>
+        {%- endif -%}
+        
+        {%- if product.available -%}
+          <product-form class="quick-view-form" data-section-id="quick-view-{{ product.id }}">
+            {%- form 'product', product, id: 'quick-view-form-' | append: product.id, class: 'form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+              {%- if product.variants.size > 1 -%}
+                <div class="quick-view-variants">
+                  {%- for option in product.options_with_values -%}
+                    <div class="product-form__input">
+                      <label class="form__label" for="Option-{{ option.name | escape }}-{{ product.id }}">
+                        {{ option.name }}
+                      </label>
+                      <select
+                        id="Option-{{ option.name | escape }}-{{ product.id }}"
+                        class="select__select"
+                        name="options[{{ option.name | escape }}]"
+                        form="quick-view-form-{{ product.id }}"
+                      >
+                        {%- for value in option.values -%}
+                          <option
+                            value="{{ value | escape }}"
+                            {% if option.selected_value == value %}selected="selected"{% endif %}
+                          >
+                            {{ value }}
+                          </option>
+                        {%- endfor -%}
+                      </select>
+                    </div>
+                  {%- endfor -%}
+                </div>
+              {%- endif -%}
+              
+              <div class="quick-view-quantity">
+                <label class="form__label" for="Quantity-{{ product.id }}">
+                  {{ 'products.product.quantity.label' | t }}
+                </label>
+                <quantity-input class="quantity">
+                  <button class="quantity__button no-js-hidden" name="minus" type="button">
+                    <span class="visually-hidden">
+                      {{- 'products.product.quantity.decrease' | t: product: product.title | escape -}}
+                    </span>
+                    <svg class="icon icon-minus" aria-hidden="true" focusable="false">
+                      <use href="#icon-minus">
+                    </svg>
+                  </button>
+                  <input
+                    class="quantity__input"
+                    type="number"
+                    name="quantity"
+                    id="Quantity-{{ product.id }}"
+                    min="1"
+                    value="1"
+                    form="quick-view-form-{{ product.id }}"
+                  >
+                  <button class="quantity__button no-js-hidden" name="plus" type="button">
+                    <span class="visually-hidden">
+                      {{- 'products.product.quantity.increase' | t: product: product.title | escape -}}
+                    </span>
+                    <svg class="icon icon-plus" aria-hidden="true" focusable="false">
+                      <use href="#icon-plus">
+                    </svg>
+                  </button>
+                </quantity-input>
+              </div>
+              
+              <input
+                type="hidden"
+                name="id"
+                value="{{ product.selected_or_first_available_variant.id }}"
+                class="product-variant-id"
+              >
+              
+              <div class="quick-view-actions">
+                <button
+                  type="submit"
+                  name="add"
+                  class="btn product-form__cart-submit button button--full-width button--primary"
+                  {% if product.selected_or_first_available_variant.available == false %}disabled{% endif %}
+                >
+                  <span>
+                    {%- if product.selected_or_first_available_variant.available -%}
+                      {{ 'products.product.add_to_cart' | t }}
+                    {%- else -%}
+                      {{ 'products.product.sold_out' | t }}
+                    {%- endif -%}
+                  </span>
+                  {%- render 'loading-spinner' -%}
+                </button>
+                
+                <a href="{{ product.url }}" class="button button--secondary button--full-width">
+                  {{ 'products.product.view_full_details' | t }}
+                </a>
+              </div>
+            {%- endform -%}
+          </product-form>
+        {%- else -%}
+          <div class="quick-view-sold-out">
+            <button type="button" class="button button--full-width" disabled>
+              {{ 'products.product.sold_out' | t }}
+            </button>
+            <a href="{{ product.url }}" class="button button--secondary button--full-width">
+              {{ 'products.product.view_full_details' | t }}
+            </a>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</quick-view-modal>
+
+<style>
+  .quick-view-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .quick-view-modal.active {
+    display: flex;
+  }
+
+  .quick-view-modal__content {
+    background: rgb(var(--color-base-background-1));
+    border-radius: 8px;
+    max-width: 800px;
+    max-height: 90vh;
+    width: 90%;
+    overflow-y: auto;
+    position: relative;
+    padding: 2rem;
+  }
+
+  .quick-view-modal__toggle {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 1001;
+  }
+
+  .quick-view-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  @media screen and (max-width: 749px) {
+    .quick-view-content {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    
+    .quick-view-modal__content {
+      padding: 1.5rem;
+      margin: 1rem;
+    }
+  }
+
+  .quick-view-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+
+  .quick-view-title {
+    font-size: 2.4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: rgb(var(--color-base-text));
+  }
+
+  .quick-view-price {
+    margin-bottom: 1.5rem;
+  }
+
+  .quick-view-description {
+    margin-bottom: 2rem;
+    color: rgba(var(--color-base-text), 0.7);
+    line-height: 1.5;
+  }
+
+  .quick-view-variants {
+    margin-bottom: 1.5rem;
+  }
+
+  .quick-view-quantity {
+    margin-bottom: 2rem;
+  }
+
+  .quick-view-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .quick-view-sold-out {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+</style>
+
+<script>
+  class QuickViewModal extends HTMLElement {
+    constructor() {
+      super();
+      this.addEventListener('click', this.onClickOutside.bind(this));
+      this.querySelector('.quick-view-modal__toggle').addEventListener('click', this.close.bind(this));
+    }
+
+    onClickOutside(event) {
+      if (event.target === this) {
+        this.close();
+      }
+    }
+
+    open() {
+      this.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    close() {
+      this.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+
+  customElements.define('quick-view-modal', QuickViewModal);
+
+  // Handle modal opener
+  class ModalOpener extends HTMLElement {
+    constructor() {
+      super();
+      this.addEventListener('click', this.openModal.bind(this));
+    }
+
+    openModal() {
+      const modalId = this.getAttribute('data-modal');
+      const modal = document.querySelector(modalId);
+      if (modal) {
+        modal.open();
+      }
+    }
+  }
+
+  customElements.define('modal-opener', ModalOpener);
+</script>
