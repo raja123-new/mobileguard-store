@@ -1,0 +1,288 @@
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin: 0 auto;
+    max-width: var(--page-width);
+    padding: 0 1.5rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .categories-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3rem;
+    }
+  }
+
+  .category-card {
+    background: rgb(var(--color-base-background-1));
+    border: 1px solid rgba(var(--color-base-text), 0.1);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: rgb(var(--color-base-text));
+    display: block;
+  }
+
+  .category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(var(--color-shadow), 0.15);
+    border-color: rgba(var(--color-base-text), 0.2);
+  }
+
+  .category-card__title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: rgb(var(--color-base-text));
+  }
+
+  .category-card__description {
+    font-size: 1.4rem;
+    color: rgba(var(--color-base-text), 0.7);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+
+  .category-card__cta {
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    background: rgb(var(--color-base-accent-1));
+    color: rgb(var(--color-base-solid-button-labels));
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+  }
+
+  .category-card__cta:hover {
+    background: rgb(var(--color-button-hover));
+    color: rgb(var(--color-base-solid-button-labels));
+  }
+
+  .categories-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .categories-header__title {
+    font-size: 3.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: rgb(var(--color-base-text));
+  }
+
+  .categories-header__subtitle {
+    font-size: 1.6rem;
+    color: rgba(var(--color-base-text), 0.7);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  @media screen and (max-width: 749px) {
+    .categories-header__title {
+      font-size: 2.4rem;
+    }
+    
+    .categories-header__subtitle {
+      font-size: 1.4rem;
+    }
+    
+    .category-card {
+      padding: 1.5rem;
+    }
+    
+    .category-card__title {
+      font-size: 1.6rem;
+    }
+  }
+{%- endstyle -%}
+
+<div class="color-{{ section.settings.color_scheme }} gradient">
+  <div class="section-{{ section.id }}-padding">
+    {%- if section.settings.title != blank or section.settings.subtitle != blank -%}
+      <div class="categories-header">
+        {%- if section.settings.title != blank -%}
+          <h2 class="categories-header__title">{{ section.settings.title | escape }}</h2>
+        {%- endif -%}
+        {%- if section.settings.subtitle != blank -%}
+          <p class="categories-header__subtitle">{{ section.settings.subtitle | escape }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="categories-grid">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'category' -%}
+            <a href="{{ block.settings.link | default: '#' }}" class="category-card" {{ block.shopify_attributes }}>
+              {%- if block.settings.title != blank -%}
+                <h3 class="category-card__title">{{ block.settings.title | escape }}</h3>
+              {%- endif -%}
+              {%- if block.settings.description != blank -%}
+                <p class="category-card__description">{{ block.settings.description | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.button_label != blank -%}
+                <span class="category-card__cta">{{ block.settings.button_label | escape }}</span>
+              {%- endif -%}
+            </a>
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Categories",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "default": "Shop by Category",
+      "label": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "default": "Explore our premium collection of mobile accessories",
+      "label": "Subtitle"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "options": [
+        {
+          "value": "accent-1",
+          "label": "Accent 1"
+        },
+        {
+          "value": "accent-2",
+          "label": "Accent 2"
+        },
+        {
+          "value": "background-1",
+          "label": "Background 1"
+        },
+        {
+          "value": "background-2",
+          "label": "Background 2"
+        },
+        {
+          "value": "inverse",
+          "label": "Inverse"
+        }
+      ],
+      "default": "background-1",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "default": "Tempered Glass",
+          "label": "Category title"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "default": "Premium screen protectors for ultimate device protection",
+          "label": "Category description"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "default": "Shop Now",
+          "label": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Category link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Categories",
+      "blocks": [
+        {
+          "type": "category",
+          "settings": {
+            "title": "Tempered Glass",
+            "description": "Premium screen protectors for ultimate device protection",
+            "button_label": "Shop Now"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Phone Covers",
+            "description": "Stylish and protective cases for all phone models",
+            "button_label": "Explore"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Accessories",
+            "description": "Complete your mobile setup with our accessories",
+            "button_label": "Discover"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
